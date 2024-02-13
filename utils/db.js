@@ -1,4 +1,3 @@
-// file 'db.js'
 import { MongoClient } from 'mongodb';
 
 class DBClient {
@@ -6,7 +5,7 @@ class DBClient {
     this.DB_HOST = 'localhost';
     this.DB_PORT = 27017;
     this.DB_DATABASE = 'files_manager';
-    this.client = new MongoClient(`mongodb://${this.DB_HOST}:${this.DB_PORT}`, { useUnifiedTopology: true });
+    this.client = new MongoClient(`mongodb://${this.DB_HOST}:${this.DB_PORT}`);
   }
 
   async isAlive() {
@@ -31,12 +30,7 @@ class DBClient {
   }
 
   async nbFiles() {
-    try {
-      const files = this.client.db(this.DB_DATABASE).collection('files').countDocuments();
-      return files;
-    } catch (error) {
-      throw new Error(error);
-    }
+    return this.client.db(this.DB_DATABASE).collection('files').countDocuments();
   }
 }
 
