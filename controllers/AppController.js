@@ -1,26 +1,29 @@
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
 
-const getStatus = (req, res) => {
-  if (redisClient.isAlive()) {
-    res.status(200).send({ redis: true, db: true });
-  } else {
-    res.status(500).send('Redis client is not connected to the server');
-  }
+const AppController = {
+  async getStatus(req, res) {
+    try {
+      const redisStatus = await redisClient.isAlive();
+      const dbStatus = await dbClient.isAlive();
+      res.status(200).json({ redis: redisStatus, db: dbStatus });
+    } catch (error) {
+      console.error('Error getting status:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  },
+
+  async getStats(req, res) {
+    try {
+      const usersCount = await dbClient.nbUsers();
+      const filesCount = await dbClient.nbFiles();
+      res.status(200).json({ users: usersCount, files: filesCount });
+    } catch (error) {
+      console.error('Error getting stats:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  },
 };
 
-const getStats = (req, res) => {
-  const stats = {
-    users: dbClient.nbUsers(),
-    files: dbClient.nbFiles(),
-  };
-  res.status(200).send({ users: stats.users, files: stats.files });
-};
-
-const controllerfunctions = {
-  getStatus,
-  getStats,
-};
-
-module.exports = controllerfunctions;
-export default controllerfunctions;
+module.exports = AppController;
+export default AppController;

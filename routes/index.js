@@ -1,9 +1,9 @@
 import express from 'express';
-import controllerfunctions from '../controllers/AppController';
+import AppController from '../controllers/AppController';
 
 const router = express.Router();
 
-router.get('/status', controllerfunctions.getStatus);
-router.get('/stats', controllerfunctions.getStats);
+router.get('/status', AppController.getStatus);
+router.get('/stats', AppController.getStats);
 
 module.exports = router;
