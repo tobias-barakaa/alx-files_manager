@@ -7,7 +7,7 @@ class DBClient {
     this.host = 'localhost';
     this.port = 27017;
     this.database = 'files_manager';
-    this.client = new MongoClient(`mongodb://${this.host}:${this.port}`, { useNewUrlParser: true, useUnifiedTopology: true });
+    this.client = new MongoClient(`mongodb://${this.host}:${this.port}`);
     this.client.connect();
     this.db = this.client.db(this.database);
   }
