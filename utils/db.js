@@ -15,17 +15,28 @@ class DBClient {
       console.log('Connection to DB established');
       return true;
     } catch (error) {
-      console.log('Connection to DB failed:', error);
+      console.error('Connection to DB failed:', error);
       return false;
     }
   }
 
   async nbUsers() {
-    return this.client.db(this.DB_DATABASE).collection('users').countDocuments();
+    try {
+      const data = await this.client.db(this.DB_DATABASE).collection('users').find().toArray();
+      return data;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   async nbFiles() {
-    return this.client.db(this.DB_DATABASE).collection('files').countDocuments();
+    try {
+      const files = this.client.db(this.DB_DATABASE).collection('files').countDocuments();
+      return files;
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 }
 
