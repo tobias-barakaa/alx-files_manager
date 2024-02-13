@@ -4,19 +4,19 @@ import { MongoClient } from 'mongodb';
 
 class DBClient {
     constructor() {
-        this.DB_HOST = process.env.DB_HOST || 'localhost';
-        this.DB_PORT = process.env.DB_PORT || 27017;
-        this.DB_DATABASE = process.env.DB_DATABASE || 'files_manager';
+        this.DB_HOST = 'localhost';
+        this.DB_PORT = 27017;
+        this.DB_DATABASE = 'files_manager';
         this.client = new MongoClient(`mongodb://${this.DB_HOST}:${this.DB_PORT}`);
     }
 
     async isAlive() {
         try {
             await this.client.connect();
-            console.log('Connection to MongoDB established');
+            console.log('Connection to DB established');
             return true;
         } catch (error) {
-            console.error('Connection to MongoDB failed:', error);
+            console.error('Connection to DB failed:', error);
             return false;
         }
     }
