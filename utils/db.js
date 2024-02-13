@@ -9,18 +9,19 @@ class DBClient {
     this.client = new MongoClient(`mongodb://${this.DB_HOST}:${this.DB_PORT}`, { useUnifiedTopology: true });
   }
 
-  isAlive() {
-    return this.client.connect();
+  async isAlive() {
+    try {
+      await this.client.connect();
+      console.log('Connection to DB established');
+      return true;
+    } catch (error) {
+      console.log('Connection to DB failed:', error);
+      return false;
+    }
   }
 
   async nbUsers() {
-    try {
-      const data = await this.client.db(this.DB_DATABASE).collection('users').find().toArray();
-      return data;
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
+    return this.client.db(this.DB_DATABASE).collection('users').countDocuments();
   }
 
   async nbFiles() {
