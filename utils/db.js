@@ -9,8 +9,15 @@ class DBClient {
     this.client = new MongoClient(`mongodb://${this.DB_HOST}:${this.DB_PORT}`, { useUnifiedTopology: true });
   }
 
-  isAlive() {
-    this.client.connect();
+  async isAlive() {
+    try {
+      await this.client.connect();
+      console.log('Connection to DB established');
+      return true;
+    } catch (error) {
+      console.log('Connection to DB failed:', error);
+      return false;
+    }
   }
 
   async nbUsers() {
