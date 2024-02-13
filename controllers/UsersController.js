@@ -1,6 +1,6 @@
 // controllers/UsersController.js
 
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 import sha1 from 'sha1';
 
 class UsersController {
@@ -40,8 +40,8 @@ class UsersController {
                 password: hashedPassword,
             });
 
-            // Return the newly created user
-            return res.status(201).json({ id: result.insertedId, email });
+            // Return the newly created user with Mongoid
+            return res.status(201).json({ id: result.insertedId.toHexString(), email });
         } catch (error) {
             console.error('Error creating user:', error);
             return res.status(500).json({ error: 'Internal Server Error' });
@@ -52,4 +52,4 @@ class UsersController {
 }
 
 export default UsersController;
-module.exports = UsersController;
+export { UsersController };
