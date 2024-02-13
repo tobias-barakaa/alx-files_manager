@@ -1,30 +1,38 @@
-// controllers/UsersController.js
 import sha1 from 'sha1';
 import dbClient from '../utils/db';
 
-const UsersController = {
-  async postNew(req, res) {
-    // receive data from the client
+class UsersController {
+  static async postNew(req, res) {
     const { email, password } = req.body;
-    // check if the email and password are provided
-    if (!email) return res.status(400).json({ error: 'Missing email' });
-    if (!password) return res.status(400).json({ error: 'Missing password' });
-    // loop inside database and find if the email already exists
-    const user = await dbClient.usersCollection.findOne({ email });
-    // if the email already exists return an error "Already exist"
-    if (user) return res.status(400).json({ error: 'Already exist' });
-    // if the email is not found add one to the collection with password hashed
-    const result = await dbClient.usersCollection.insertOne({
+
+    if (!email) {
+      return res.status(400).json({ error: 'Missing email' });
+    }
+
+    if (!password) {
+      return res.status(400).json({ error: 'Missing password' });
+    }
+
+    const userExists = await dbClient.db.collection('users').findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ error: 'Already exist' });
+    }
+
+    const hashedPassword = sha1(password);
+    const newUser = {
       email,
-      password: sha1(password),
-    });
-    // return the email and password hashed
-    return res.status(201).json({
-      email,
-      password: result.ops[0].password,
-    });
-  },
-};
+      password: hashedPassword,
+    };
+
+    try {
+      const result = await dbClient.db.collection('users').insertOne(newUser);
+      return res.status(201).json({ id: result.insertedId, email });
+    } catch (error) {
+      console.error('Error creating user:', error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
+}
 
 module.exports = UsersController;
 export default UsersController;
