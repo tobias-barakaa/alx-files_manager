@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import sha1 from 'sha1';
 import dbClient from '../utils/db';
 
@@ -13,20 +14,31 @@ class UsersController {
       return res.status(400).json({ error: 'Missing password' });
     }
 
-    const userExists = await dbClient.db.collection('users').findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ error: 'Already exist' });
-    }
-
-    const hashedPassword = sha1(password);
-    const newUser = {
-      email,
-      hashedPassword,
-    };
-
     try {
+      // Check if the user already exists
+      const userExists = await dbClient.db.collection('users').findOne({ email });
+      if (userExists) {
+        return res.status(400).json({ error: 'Already exist' });
+      }
+
+      // Hash the password
+      const hashedPassword = sha1(password);
+
+      // Generate a new ObjectID for the user
+      const userId = new ObjectId();
+
+      // Create a new user object
+      const newUser = {
+        _id: userId,
+        email,
+        hashedPassword,
+      };
+
+      // Insert the new user into the database
       const result = await dbClient.db.collection('users').insertOne(newUser);
-      return res.status(201).json({ id: result.insertedId, email });
+
+      // Return the response with the user ID
+      return res.status(201).json({ id: result.insertedId.toHexString(), email });
     } catch (error) {
       console.error('Error creating user:', error);
       return res.status(500).json({ error: 'Internal Server Error' });
@@ -34,5 +46,4 @@ class UsersController {
   }
 }
 
-module.exports = UsersController;
 export default UsersController;
