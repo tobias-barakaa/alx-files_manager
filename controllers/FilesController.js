@@ -1,4 +1,4 @@
-/* eslint-disable no-param-reassign */
+/* eslint-disable */
 import { ObjectId } from 'mongodb';
 import { writeFileSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
