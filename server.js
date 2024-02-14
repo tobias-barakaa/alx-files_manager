@@ -12,7 +12,7 @@ const logMiddleware = (req, res, next) => {
 };
 
 // Middleware function for handling errors
-const errorHandlerMiddleware = (err, req, res, next) => {
+const errorHandlerMiddleware = (err, req, res) => {
   console.error(err.stack);
   res.status(500).send('Internal Server Error');
 };
