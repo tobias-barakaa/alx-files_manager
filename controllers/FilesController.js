@@ -6,21 +6,68 @@ import path from 'path';
 import dbClient from '../utils/db';
 
 class FilesController {
-    static async postUpload(req, res) {
-        const { name, type, parentId } = req.body;
-        const file = await dbClient.db.collection('files').insertOne({ name, type, parentId });
-        const { _id } = file;
-        const filePath = path.join(process.env.FOLDER_PATH, _id);
-        writeFileSync(filePath, req
-        .file.buffer);
-        return res.status(201).json({
-        id: _id,
-        name,
-        type,
-        parentId,
-        });
+    async postUpload(req, res) {
+        const { userId } = req;
+        const { name, type, parentId, isPublic, data } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        if (!name) {
+            return res.status(400).json({ error: 'Missing name' });
+        }
+
+        if (!type || !['folder', 'file', 'image'].includes(type)) {
+            return res.status(400).json({ error: 'Missing or invalid type' });
+        }
+
+        if (type !== 'folder' && !data) {
+            return res.status(400).json({ error: 'Missing data' });
+        }
+
+        if (parentId) {
+            const parentFile = await dbClient.files.findOne({ _id: ObjectId(parentId) });
+            if (!parentFile) {
+                return res.status(400).json({ error: 'Parent not found' });
+            }
+            if (parentFile.type !== 'folder') {
+                return res.status(400).json({ error: 'Parent is not a folder' });
+            }
+        }
+
+        const fileData = {
+            userId: ObjectId(userId),
+            name,
+            type,
+            parentId: parentId || '0',
+            isPublic: isPublic || false,
+        };
+
+        if (type === 'folder') {
+            await dbClient.files.insertOne(fileData);
+            return res.status(201).json(fileData);
+        } else {
+            const fileUUID = uuidv4();
+            const filePath = path.join(FOLDER_PATH, fileUUID);
+            const fileMimeType = mime.lookup(name);
+
+            try {
+                await fs.promises.writeFile(filePath, data, 'base64');
+                fileData.localPath = filePath;
+                fileData.mimeType = fileMimeType;
+                fileData.status = 'available';
+                fileData.size = Buffer.byteLength(data, 'base64');
+
+                await dbClient.files.insertOne(fileData);
+
+                return res.status(201).json(fileData);
+            } catch (error) {
+                return res.status(400).json({ error: 'Cannot write file' });
+            }
+        }
     }
-    
+
     
     static async getShow(req, res) {
         const { id } = req.params;
