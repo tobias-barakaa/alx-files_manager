@@ -1,11 +1,12 @@
-import { getMongoInstance, ObjectId } from 'mongodb';
-import { v4 as uuidv4 } from 'uuid';
-import fs from 'fs';
-import path from 'path';
+/* eslint-disable */
+
+import Queue from 'bull';
+import { ObjectId } from 'mongodb';
+import { v4 as uuidv4 } from 'uuidv4';
+import { mkdir, writeFile, readFileSync } from 'fs';
 import mime from 'mime-types';
-import { Queue } from 'bull';
 import dbClient from '../utils/db';
-import redisClient from '../utils/redis';
+import { getIdAndKey, isValidUser } from '../utils/users';
 
 // nothing here yet, just trying to see where's the problm
 const FilesController = {
