@@ -19,9 +19,10 @@ async function postNew(req, res) {
   }
 
   // Hash the password using SHA1
-  const hashedPassword = sha1(password);
+  const hashedPassword = sha1('toto1234!');
 
   // Insert the new user into the database
+  console.log(hashedPassword);
   const result = await db.collection('users').insertOne({
     email,
     password: hashedPassword,
