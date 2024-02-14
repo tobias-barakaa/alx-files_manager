@@ -1,41 +1,35 @@
-const sha1 = require('sha1');
-const db = require('../utils/db');
+import sha1 from 'sha1';
+import dbClient from '../utils/db';
 
-async function postNew(req, res) {
-  const { email, password } = req.body;
+const postNew = async (req, res) => {
+    const { email, password } = req.body;
 
-  // Check if email and password are provided
-  if (!email) {
-    return res.status(400).json({ error: 'Missing email' });
-  }
-  if (!password) {
-    return res.status(400).json({ error: 'Missing password' });
-  }
+    if (!email) {
+        return res.status(400).json({ error: 'Missing email' });
+    }
 
-  // Check if email already exists in DB
-  const existingUser = await db.collection('users').findOne({ email });
-  if (existingUser) {
-    return res.status(400).json({ error: 'Already exist' });
-  }
+    if (!password) {
+        return res.status(400).json({ error: 'Missing password' });
+    }
 
-  // Hash the password using SHA1
-  const hashedPassword = sha1('toto1234!');
+    try {
+        const existingUser = await dbClient.db.collection('users').findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Already exist' });
+        }
 
-  // Insert the new user into the database
-  console.log(hashedPassword);
-  const result = await db.collection('users').insertOne({
-    email,
-    password: hashedPassword,
-  });
+        const hashedPassword = sha1(password);
 
-  // Return the new user's email and auto-generated _id with status code 201
-  const newUser = {
-    id: result.insertedId,
-    email,
-  };
-  return res.status(201).json(newUser);
-}
+        const result = await dbClient.db.collection('users').insertOne({
+            email,
+            password: hashedPassword,
+        });
 
-module.exports = {
-  postNew,
+        return res.status(201).json({ id: result.insertedId.toHexString(), email });
+    } catch (error) {
+        console.error('Error creating user:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
 };
+
+export default { postNew };
