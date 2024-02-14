@@ -4,10 +4,10 @@ const router = express.Router();
 
 const AppController = require('../controllers/AppController');
 
-const UsersController = require('../controllers/UsersController');
+const postNew = require('../controllers/UsersController');
 
 router.get('/status', AppController.getStatus);
 router.get('/stats', AppController.getStats);
-router.post('/users', UsersController.postNew);
+router.post('/users', postNew);
 
 module.exports = router;
