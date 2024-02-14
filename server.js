@@ -1,6 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import userRouter from './routes/index';
+import routerr from './routes/index';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -19,12 +19,9 @@ const errorHandlerMiddleware = (err, req, res) => {
 
 app.use(bodyParser.json());
 app.use(logMiddleware);
-app.use('/', userRouter);
+app.use('/', routerr);
 app.use(errorHandlerMiddleware);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
-
-module.exports = app;
-export default app;
