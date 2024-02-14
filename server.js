@@ -3,7 +3,7 @@ import bodyParser from 'body-parser';
 import userRouter from './routes/index';
 
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 // Middleware function for logging requests
 const logMiddleware = (req, res, next) => {
@@ -25,3 +25,6 @@ app.use(errorHandlerMiddleware);
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
+module.exports = app;
+export default app;
