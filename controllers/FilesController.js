@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { ObjectId } from 'mongodb';
+import { writeFileSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import dbClient from '../utils/db';
