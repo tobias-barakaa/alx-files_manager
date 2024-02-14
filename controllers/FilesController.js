@@ -8,33 +8,19 @@ import dbClient from '../utils/db';
 class FilesController {
     static async postUpload(req, res) {
         const { name, type, parentId } = req.body;
-        const { data } = req;
-        if (!name) return res.status(400).json({ error: 'Missing name' });
-        if (!type) return res.status(400).json({ error: 'Missing type' });
-        if (!data) return res.status(400).json({ error: 'Missing data' });
-        if (type !== 'folder' && !parentId) return res.status(400).json({ error: 'Missing parentId' });
-        if (type !== 'folder') {
-        const parentFile = await dbClient.db.collection('files').findOne({ _id: ObjectId(parentId) });
-        if (!parentFile) return res.status(400).json({ error: 'Parent not found' });
-        if (parentFile.type !== 'folder') return res.status(400).json({ error: 'Parent is not a folder' });
-        }
-        const file = {
-        userId: req.userId,
-        name,
-        type,
-        parentId: parentId || 0,
-        };
-        const result = await dbClient.db.collection('files').insertOne(file);
-        const filePath = path.join(__dirname, '..', process.env.FOLDER_PATH, result.insertedId);
-        writeFileSync(filePath, data);
+        const file = await dbClient.db.collection('files').insertOne({ name, type, parentId });
+        const { _id } = file;
+        const filePath = path.join(process.env.FOLDER_PATH, _id);
+        writeFileSync(filePath, req
+        .file.buffer);
         return res.status(201).json({
-        id: result.insertedId,
-        userId: req.userId,
+        id: _id,
         name,
         type,
-        parentId: parentId || 0,
+        parentId,
         });
     }
+    
     
     static async getShow(req, res) {
         const { id } = req.params;
