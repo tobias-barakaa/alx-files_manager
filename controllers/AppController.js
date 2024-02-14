@@ -1,29 +1,25 @@
+/* eslint-disable import/no-named-as-default */
+
+// Importing Redis and database clients
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
 
-const AppController = {
-  async getStatus(req, res) {
-    try {
-      const redisStatus = await redisClient.isAlive();
-      const dbStatus = await dbClient.isAlive();
-      res.status(200).json({ redis: redisStatus, db: dbStatus });
-    } catch (error) {
-      console.error('Error getting status:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  },
+// Exporting AppController class with static methods
+export default class AppController {
+  // Returns the status of the Redis and database clients
+  static getStatus(req, res) {
+    res.status(200).json({
+      redis: redisClient.isAlive(), // Checks if Redis client is alive
+      db: dbClient.isAlive(), // Checks if database client is alive
+    });
+  }
 
-  async getStats(req, res) {
-    try {
-      const usersCount = await dbClient.nbUsers();
-      const filesCount = await dbClient.nbFiles();
-      res.status(200).json({ users: usersCount, files: filesCount });
-    } catch (error) {
-      console.error('Error getting stats:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  },
-};
-
-module.exports = AppController;
-export default AppController;
+  // Returns the number of users and files in the database
+  static getStats(req, res) {
+    // Using Promise.all to asynchronously get the number of users and files
+    Promise.all([dbClient.nbUsers(), dbClient.nbFiles()])
+      .then(([usersCount, filesCount]) => {
+        res.status(200).json({ users: usersCount, files: filesCount });
+      });
+  }
+}

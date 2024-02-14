@@ -1,11 +1,20 @@
-const express = require('express');
-const allRoutes = require('./routes/index');
+// Importing necessary modules
+import express from 'express'; //Express framework
+import startServer from './libs/boot'; //server bootstrapping function
+import injectRoutes from './routes'; // route injection function
+import injectMiddlewares from './libs/middlewares'; //injection function
 
-const app = express();
-const port = process.env.PORT || 5000;
+// Creating an instance of Express application
+const server = express();
 
-app.use(express.json());
-app.use('/', allRoutes);
+// Injecting middlewares into the Express application
+injectMiddlewares(server);
 
-app.listen(port);
-module.exports = app;
+// Injecting routes into the Express application
+injectRoutes(server);
+
+// Starting the server by invoking the bootstrapping function
+startServer(server);
+
+// Exporting the Express application instance for external use
+export default server;
