@@ -1,30 +1,12 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import userRouter from './routes/index';
+const express = require('express');
+const allRoutes = require('./routes/index');
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Middleware function for logging requests
-const logMiddleware = (req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
-};
+app.use(express.json());
+// sets all the routes created in routes/index
+app.use('/', allRoutes);
 
-// Middleware function for handling errors
-const errorHandlerMiddleware = (err, req, res) => {
-  console.error(err.stack);
-  res.status(500).send('Internal Server Error');
-};
-
-app.use(bodyParser.json());
-app.use(logMiddleware);
-app.use('/', userRouter);
-app.use(errorHandlerMiddleware);
-
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
-
+app.listen(port);
 module.exports = app;
-export default app;
