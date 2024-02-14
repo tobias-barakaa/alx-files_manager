@@ -47,4 +47,5 @@ const AuthController = {
   },
 };
 
+module.exports = AuthController;
 export default AuthController;
