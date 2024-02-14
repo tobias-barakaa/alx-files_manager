@@ -1,8 +1,9 @@
 import sha1 from 'sha1';
+import { ObjectId } from 'mongodb';
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
 
-const UserController = {
+const UsersController = {
   postNew: async (req, res) => {
     const { email, password } = req.body;
 
@@ -15,25 +16,21 @@ const UserController = {
     }
 
     try {
-      const existingUser = await dbClient.db.collection('users').findOne({ email });
-      if (existingUser) {
+      const userExists = await dbClient.db.collection('users').findOne({ email });
+
+      if (userExists) {
         return res.status(400).json({ error: 'Already exist' });
       }
 
       const hashedPassword = sha1(password);
+      const result = await dbClient.db.collection('users').insertOne({ email, password: hashedPassword });
 
-      const result = await dbClient.db.collection('users').insertOne({
-        email,
-        password: hashedPassword,
-      });
-
-      return res.status(201).json({ id: result.insertedId, email });
+      return res.status(201).json({ email, id: result.insertedId });
     } catch (error) {
       console.error('Error creating user:', error);
       return res.status(500).json({ error: 'Internal Server Error' });
     }
   },
-
   getMe: async (req, res) => {
     const { token } = req.headers;
 
@@ -49,18 +46,18 @@ const UserController = {
         return res.status(401).json({ error: 'Unauthorized' });
       }
 
-      const user = await dbClient.db.collection('users').findOne({ _id: dbClient.ObjectId(userId) }, { projection: { email: 1, _id: 1 } });
+      const user = await dbClient.db.collection('users').findOne({ _id: ObjectId(userId) });
 
       if (!user) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
 
-      return res.json(user);
+      return res.status(200).json({ email: user.email });
     } catch (error) {
-      console.error('Error retrieving user:', error);
+      console.error('Error getting user:', error);
       return res.status(500).json({ error: 'Internal Server Error' });
     }
   },
 };
 
-export default UserController;
+export default UsersController;
