@@ -20,7 +20,5 @@ router.get('/files/:id', FilesController.getShow);
 router.get('/files', FilesController.index);
 router.delete('/files/:id', FilesController.destroy);
 
-
-
 module.exports = router;
 export default router;
