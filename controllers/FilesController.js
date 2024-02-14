@@ -7,50 +7,56 @@ import dbClient from '../utils/db';
 const FOLDER_PATH = process.env.FOLDER_PATH || '/tmp/files_manager';
 
 const FilesController = {
-  async postUpload(req, res) {
+  upload: async (req, res) => {
     const token = req.header('X-Token');
     const { name } = req.body;
+    const { type, data } = req.file;
 
     if (!token) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    if (!name) {
-      return res.status(400).json({ error: 'Missing name' });
-    }
-    const userId = await redisClient.get(`auth_${token}`);
+        const userId = await redisClient.get(`auth_${token}`);
 
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+        if (!userId) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
 
-    const user = await dbClient.db.collection('users').findOne({ _id: ObjectId(userId) });
-    if (!user) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+        const user = await dbClient.db.collection('users').findOne({ _id: ObjectId(userId) });
 
-    const { file } = req;
-    const filePath = `${FOLDER_PATH}/${uuidv4()}`;
-    const fileData = {
-      userId: user._id,
-      name,
-      type: file.mimetype,
-      path: filePath,
-    };
-    fs.writeFile(filePath, file.buffer, async (error) => {
-      if (error) {
-        return res.status(500).json({ error: 'Error reading file' });
-      }
+        if (!user) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
 
-      await dbClient.db.collection('files').insertOne(fileData);
-      return res.status(201).json({
-        id: fileData._id, userId: fileData.userId, name: fileData.name, type: fileData.type,
-      });
-    });
+        if (!fs.existsSync(FOLDER_PATH)) {
+            fs.mkdirSync(FOLDER_PATH, { recursive: true });
+        }
 
-    // Add a default return statement
-    return null;
-  },
+        const filePath = `${FOLDER_PATH}/${uuidv4()}`;
+        fs.writeFile(filePath, data, { encoding: 'base64' }, async (err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Upload failed' });
+            }
+
+            const result = await dbClient.db.collection('files').insertOne({
+                userId: user._id,
+                name,
+                type,
+                path: filePath,
+            });
+
+            return res.status(201).json({
+                id: result.insertedId,
+                userId: user._id,
+                name,
+                type,
+            });
+        });
+
+        // Default return statement
+        return null;
+    },
+    
 };
 
-module.exports = FilesController;
+export default FilesController;
