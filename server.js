@@ -18,9 +18,9 @@ const errorHandlerMiddleware = (err, req, res) => {
 };
 
 app.use(bodyParser.json());
-app.use(logMiddleware); // Using logMiddleware for logging requests
+app.use(logMiddleware);
 app.use('/', userRouter);
-app.use(errorHandlerMiddleware); // Using errorHandlerMiddleware for handling errors
+app.use(errorHandlerMiddleware);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
