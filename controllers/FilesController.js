@@ -28,19 +28,14 @@ const FilesController = {
         writeFileSync(filePath, data, 'base64');
         return res.status(201).json({ id: _id, name, type });
     },
-    getShow: async (req, res) => {
-        const fileId = req.params.id;
-        let file;
-        try {
-            file = await dbClient.db.collection('files').findOne({ _id: ObjectId(fileId) });
-        } catch (error) {
-            return res.status(404).json({ error: 'Not found' });
-        }
-        if (!file) {
-            return res.status(404).json({ error: 'Not found' });
-        }
-        const filePath = path.join(__dirname, '../', process.env.FOLDER_PATH, fileId);
-        return res.status(200).sendFile(filePath);
+    async getShow(request, response) {
+        const fileId = request.params.id;
+    
+        const { userId } = await userUtils.getUserIdAndKey(request);
+    
+        const user = await userUtils.getUser({
+          _id: ObjectId(userId),
+        });
     },
     getIndex: async (req, res) => {
         const parentId = req.params.id || 0;
