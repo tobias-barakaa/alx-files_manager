@@ -79,10 +79,10 @@ WSGI_APPLICATION = "bwf.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "new",
+        "NAME": "lost",
         "USER": "postgres",
         "PASSWORD": "tob@123",
-        "HOST": "bwf",
+        "HOST": "localhost",
         "PORT": "5432"
     }
 }
